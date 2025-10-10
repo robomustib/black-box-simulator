@@ -4,6 +4,7 @@ The Blackbox Simulator is an interactive web-based tool that visualizes and expl
 It simulates a *black box* a system where inputs can be observed and manipulated, but its internal logic remains hidden.  
 Learners can discover connections between inputs and outputs through experimentation.
 
+
 ---
 
 ## Purpose of the Project
@@ -15,7 +16,6 @@ This simulator serves as an educational tool for classrooms and workshops to ill
 - Experimental learning:  forming hypotheses, testing, and refining  
 - Development of problem-solving and logical reasoning skills
 
----
 
 ## How It Works
 
@@ -26,7 +26,7 @@ This simulator serves as an educational tool for classrooms and workshops to ill
 5. Show Solution: Reveals the hidden paths between inputs and outputs.  
 6. Reset: Creates a brand-new random configuration.  
 
----
+
 
 ## Learning Objectives
 
@@ -36,7 +36,7 @@ The simulator helps users understand:
 - The foundations of artificial intelligence models, which are often treated as black boxes  
 - Easy scientific experimentation: hypothesis → test → observation → refinement  
 
----
+
 
 ## Functionality
 
@@ -45,7 +45,7 @@ The simulator helps users understand:
 - Responsive Design
 - CSS Animations
 
----
+
 
 ## Features
 
@@ -57,7 +57,7 @@ The simulator helps users understand:
 | Interactive Simulation | Click to launch a ball and observe where it exits |
 | Responsive Design | Works smoothly on desktop and mobile browsers |
 
----
+
 
 ## Demo
 Click here to try out:[Blackbox-Simulator](https://www.mustafa-bilgin.de/black-box-simulation)

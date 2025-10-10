@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blackbox Simulator</title>
+    <style>
+        /* General styles */
+        .bb-simulator-container {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            user-select: none;
+        }
+        #bb-blackbox-container {
+            position: relative;
+            width: 420px;
+            height: 420px;
+            margin: 20px auto;
+            perspective: 1000px;
+        }
+        #bb-blackbox {
+            width: 400px;
+            height: 400px;
+            margin: 10px;
+            border: 10px solid #333;
+            position: relative;
+            background-color: #000;
+            border-radius: 10px;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+        .bb-port {
+            width: 30px;
+            height: 30px;
+            background-color: #666;
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            will-change: transform;
+        }
+        .bb-input-port {
+            left: -15px;
+            transform: translateY(-50%);
+        }
+        .bb-output-port {
+            right: -15px;
+            transform: translateY(-50%);
+        }
+        /* Media query for mobile */
+        @media (max-width: 600px) {
+            #bb-blackbox-container {
+                width: 320px;
+                height: 320px;
+            }
+            #bb-blackbox {
+                width: 300px;
+                height: 300px;
+            }
+            .bb-port {
+                width: 25px;
+                height: 25px;
+            }
+            .bb-input-port {
+                left: -12px;
+            }
+            .bb-output-port {
+                right: -12px;
+            }
+            .bb-port[data-port="1"] { top: calc(20% - 12.5px); }
+            .bb-port[data-port="2"] { top: calc(40% - 12.5px); }
+            .bb-port[data-port="3"] { top: calc(60% - 12.5px); }
+            .bb-port[data-port="4"] { top: calc(80% - 12.5px); }
+            .bb-port[data-port="A"] { top: calc(30% - 12.5px); }
+            .bb-port[data-port="B"] { top: calc(50% - 12.5px); }
+            .bb-port[data-port="C"] { top: calc(70% - 12.5px); }
+        }
+        /* Buttons */
+        #bb-controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .bb-button {
+            padding: 10px 15px;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            min-width: 120px;
+            font-size: 14px;
+        }
+        #bb-shake {
+            background-color: #f39c12;
+        }
+        #bb-rotate {
+            background-color: #3498db;
+        }
+        #bb-showSolution {
+            background-color: #9b59b6;
+            width: 160px; 
+        }
+        #bb-reset {
+            background-color: #e74c3c;
+        }
+        /* Info area */
+        #bb-info {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            min-height: 60px;
+        }
+        /* Shake animation */
+        .bb-shake-animation {
+            animation: bb-shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes bb-shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0) rotate(0deg); }
+            20%, 80% { transform: translate3d(2px, 0, 0) rotate(0deg); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0) rotate(0deg); }
+            40%, 60% { transform: translate3d(4px, 0, 0) rotate(0deg); }
+        }
+        /* SVG paths */
+        .bb-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .bb-svg path {
+            stroke: black;
+            stroke-width: 3;
+            fill: none;
+            transition: stroke 0.3s;
+        }
+        .bb-svg path.bb-show-solution {
+            stroke: rgba(255, 165, 0, 0.7);
+        }
+        /* Ball style */
+        .bb-ball {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            border-radius: 50%;
+            position: absolute;
+            z-index: 5;
+            pointer-events: none; /* Prevents interaction with the ball */
+        }
+    </style>
+</head>
+<body>
+<div class="bb-simulator-wrapper">
+    <div class="bb-simulator-container">
+        <h2>Blackbox Simulator</h2>
+        <p>Discover the secrets of the blackbox through simple experiments!</p>
+        <div id="bb-blackbox-container">
+            <div id="bb-blackbox">
+                <!-- Inputs and outputs are created dynamically -->
+            </div>
+        </div>
+        <div id="bb-controls">
+            <button id="bb-shake" class="bb-button">Shake</button>
+            <button id="bb-rotate" class="bb-button">Rotate (90°)</button>
+            <button id="bb-showSolution" class="bb-button">Show Solution</button>
+            <button id="bb-reset" class="bb-button">Reset</button>
+        </div>
+        <div id="bb-info">
+            <p>Click on an input (left) to throw a ball into the blackbox. Observe at which output (right) the ball comes out.</p>
+        </div>
+    </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const blackbox = document.getElementById('bb-blackbox');
+    const shakeBtn = document.getElementById('bb-shake');
+    const rotateBtn = document.getElementById('bb-rotate');
+    const showSolutionBtn = document.getElementById('bb-showSolution');
+    const resetBtn = document.getElementById('bb-reset');
+    const infoDiv = document.getElementById('bb-info');
+    let solutionVisible = false;
+    let rotationAngle = 0;
+    let currentMaze = [];
+    let portPositions = [];
+    let mazeSolution = {};
+    let svgPaths = [];
+
+    // Initialization
+    initBlackbox();
+
+    function initBlackbox() {
+        blackbox.innerHTML = '';
+        solutionVisible = false;
+        rotationAngle = 0;
+        blackbox.style.transform = 'rotate(0deg)';
+        showSolutionBtn.textContent = 'Show Solution';
+        infoDiv.innerHTML = '<p>Click on an input (left) to throw a ball into the blackbox.</p>';
+        setupPorts();
+        generateRandomMaze();
+        renderPorts();
+        createPaths();
+    }
+
+    function setupPorts() {
+        portPositions = [];
+        const inputPortCount = 4;
+        const outputPorts = ['A', 'B', 'C'];
+        // Inputs (left)
+        for (let i = 0; i < inputPortCount; i++) {
+            portPositions.push({
+                type: 'input',
+                port: (i + 1).toString(),
+                position: 0.2 + i * 0.25,
+                side: 'left'
+            });
+        }
+        // Outputs (right)
+        for (let i = 0; i < outputPorts.length; i++) {
+            portPositions.push({
+                type: 'output',
+                port: outputPorts[i],
+                position: 0.3 + i * 0.25,
+                side: 'right'
+            });
+        }
+    }
+
+    function generateRandomMaze() {
+        currentMaze = [];
+        mazeSolution = {};
+        const inputPorts = portPositions.filter(p => p.type === 'input');
+        const outputPorts = portPositions.filter(p => p.type === 'output');
+        inputPorts.forEach(input => {
+            const randomOutput = outputPorts[Math.floor(Math.random() * outputPorts.length)];
+            const path = {
+                start: getPortCoordinates(input),
+                end: getPortCoordinates(randomOutput),
+                control1: {
+                    x: getRandomX(),
+                    y: getRandomY()
+                },
+                control2: {
+                    x: getRandomX(),
+                    y: getRandomY()
+                },
+                input: input.port,
+                output: randomOutput.port
+            };
+            currentMaze.push(path);
+            mazeSolution[input.port] = randomOutput.port;
+        });
+    }
+
+    function getPortCoordinates(port) {
+        const height = blackbox.clientHeight;
+        const width = blackbox.clientWidth;
+        const y = port.position * height;
+        const x = port.side === 'left' ? 0 : width;
+        return { x, y };
+    }
+
+    function getRandomX() {
+        return Math.random() * blackbox.clientWidth * 0.5 + blackbox.clientWidth * 0.25;
+    }
+
+    function getRandomY() {
+        return Math.random() * blackbox.clientHeight * 0.8 + blackbox.clientHeight * 0.1;
+    }
+
+    function renderPorts() {
+        blackbox.querySelectorAll('.bb-port').forEach(el => el.remove());
+        portPositions.forEach(port => {
+            const portElement = document.createElement('div');
+            portElement.className = `bb-port bb-${port.type}-port`;
+            portElement.style.top = `${port.position * 100}%`;
+            portElement.setAttribute('data-port', port.port);
+            portElement.setAttribute('data-type', port.type);
+            if (port.type === 'input') {
+                portElement.addEventListener('click', () => launchBall(port.port));
+            }
+            blackbox.appendChild(portElement);
+        });
+    }
+
+    function createPaths() {
+        const oldSvg = blackbox.querySelector('svg');
+        if (oldSvg) oldSvg.remove();
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute('class', 'bb-svg');
+        svgPaths = [];
+        currentMaze.forEach(path => {
+            const pathElement = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            const d = `M ${path.start.x} ${path.start.y} C ${path.control1.x} ${path.control1.y}, ${path.control2.x} ${path.control2.y}, ${path.end.x} ${path.end.y}`;
+            pathElement.setAttribute('d', d);
+            pathElement.setAttribute('class', 'bb-maze-path');
+            pathElement.setAttribute('data-input', path.input);
+            svg.appendChild(pathElement);
+            svgPaths.push(pathElement);
+        });
+        blackbox.appendChild(svg);
+    }
+
+    function launchBall(inputPort) {
+        const outputPort = mazeSolution[inputPort];
+        const inputElement = document.querySelector(`.bb-input-port[data-port="${inputPort}"]`);
+        const ball = document.createElement('div');
+        ball.className = 'bb-ball';
+        ball.style.left = `${inputElement.offsetLeft}px`;
+        ball.style.top = `${inputElement.offsetTop + inputElement.offsetHeight / 2 - 10}px`;
+        blackbox.appendChild(ball);
+        setTimeout(() => {
+            const path = currentMaze.find(p => p.input === inputPort);
+            if (path) {
+                animateBallOnPath(ball, path);
+            }
+            setTimeout(() => {
+                ball.remove();
+            }, 1500);
+        }, 100);
+        infoDiv.innerHTML = `<p>Ball from input ${inputPort} came out at output ${outputPort}.</p>`;
+    }
+
+    function animateBallOnPath(ball, path) {
+        const duration = 1500;
+        const startTime = performance.now();
+        function animate(currentTime) {
+            const elapsedTime = currentTime - startTime;
+            const t = Math.min(elapsedTime / duration, 1);
+            const x = cubicBezier(t, path.start.x, path.control1.x, path.control2.x, path.end.x);
+            const y = cubicBezier(t, path.start.y, path.control1.y, path.control2.y, path.end.y);
+            ball.style.left = `${x - 10}px`; // Center the ball
+            ball.style.top = `${y - 10}px`; // Center the ball
+            if (t < 1) {
+                requestAnimationFrame(animate);
+            }
+        }
+        requestAnimationFrame(animate);
+    }
+
+    function cubicBezier(t, p0, p1, p2, p3) {
+        return (
+            Math.pow(1 - t, 3) * p0 +
+            3 * Math.pow(1 - t, 2) * t * p1 +
+            3 * (1 - t) * Math.pow(t, 2) * p2 +
+            Math.pow(t, 3) * p3
+        );
+    }
+
+    showSolutionBtn.addEventListener('click', () => {
+        solutionVisible = !solutionVisible;
+        svgPaths.forEach(path => {
+            path.classList.toggle('bb-show-solution', solutionVisible);
+        });
+        showSolutionBtn.textContent = solutionVisible ? 'Hide Solution' : 'Show Solution';
+        infoDiv.innerHTML = solutionVisible
+            ? '<p>The orange paths show the way the balls take through the blackbox.</p>'
+            : '<p>Click on an input (left) to throw a ball into the blackbox.</p>';
+    });
+
+    shakeBtn.addEventListener('click', () => {
+        blackbox.classList.add('bb-shake-animation');
+        setTimeout(() => {
+            generateRandomMaze();
+            renderPorts();
+            createPaths();
+            if (solutionVisible) {
+                svgPaths.forEach(path => path.classList.add('bb-show-solution'));
+            }
+            blackbox.classList.remove('bb-shake-animation');
+            infoDiv.innerHTML = '<p>The blackbox was shaken! The paths have changed.</p>';
+        }, 500);
+    });
+
+    rotateBtn.addEventListener('click', () => {
+        rotationAngle = (rotationAngle + 90) % 360;
+        blackbox.style.transform = `rotate(${rotationAngle}deg)`;
+        renderPorts();
+        createPaths();
+        if (solutionVisible) {
+            svgPaths.forEach(path => path.classList.add('bb-show-solution'));
+        }
+        infoDiv.innerHTML = `<p>The blackbox was rotated by 90°. Current rotation: ${rotationAngle}°.</p>`;
+    });
+
+    resetBtn.addEventListener('click', () => {
+        initBlackbox();
+        infoDiv.innerHTML = '<p>The blackbox was reset with a new random arrangement.</p>';
+    });
+
+    // Resize event listener
+    window.addEventListener('resize', () => {
+        renderPorts();
+        createPaths();
+    });
+});
+</script>
+</div>
+</body>
+</html>

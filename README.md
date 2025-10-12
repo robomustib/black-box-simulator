@@ -64,6 +64,6 @@ Click here to try out:[Blackbox-Simulator](https://www.mustafa-bilgin.de/black-b
 
 ```bash
 git clone https://github.com/robomustib/black-box-simulator.git
-cd blackbox-simulator
-open index.html
+cd black-box-simulator
+open black-box-simulator.html
 ```

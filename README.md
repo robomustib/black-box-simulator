@@ -63,7 +63,7 @@ The simulator helps users understand:
 Click here to try out:[Blackbox-Simulator](https://www.mustafa-bilgin.de/black-box-simulation)
 
 ```bash
-git clone https://github.com/your-username/blackbox-simulator.git
+git clone https://github.com/robomustib/black-box-simulator.git
 cd blackbox-simulator
 open index.html
 ```

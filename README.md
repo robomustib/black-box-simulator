@@ -1,9 +1,9 @@
 # Blackbox Simulator
-
 The Blackbox Simulator is an interactive web-based tool that visualizes and explores cause-and-effect relationships.  
 It simulates a *black box* a system where inputs can be observed and manipulated, but its internal logic remains hidden.  
 Learners can discover connections between inputs and outputs through experimentation.
 
+<img src="https://github.com/robomustib/black-box-simulator/blob/main/img/TheBlackboxSimulatorLogo.png?raw=true" alt="The Blackbox Simulator Logo" width="50%"/>
 
 ---
 

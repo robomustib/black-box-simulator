@@ -58,7 +58,6 @@ The simulator helps users understand:
 | Responsive Design | Works smoothly on desktop and mobile browsers |
 
 
-
 ## Demo
 Click here to try out:[Blackbox-Simulator](https://www.mustafa-bilgin.de/black-box-simulation)
 
@@ -66,4 +65,25 @@ Click here to try out:[Blackbox-Simulator](https://www.mustafa-bilgin.de/black-b
 git clone https://github.com/robomustib/black-box-simulator.git
 cd black-box-simulator
 open black-box-simulator.html
+```
+
+## Citation
+
+If you use this software for your research, please cite it using the DOI:
+
+**APA Format (7th Ed.):**
+> Bilgin, M. (2025). *Blackbox Simulator* (Version 1.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.17635298
+
+**BibTeX:**
+```bibtex
+@software{gladia_batch_transcriber,
+  author       = {Bilgin, Mustafa},
+  title        = {Blackbox Simulator},
+  year         = {2025},
+  publisher    = {Zenodo},
+  version      = {1.0.0},
+  doi          = {10.5281/zenodo.17635298},
+  url          = {[https://doi.org/10.5281/zenodo.17635298](https://doi.org/10.5281/zenodo.17635298)}  
+}
+
 ```

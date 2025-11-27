@@ -72,11 +72,11 @@ open black-box-simulator.html
 If you use this software for your research, please cite it using the DOI:
 
 **APA Format (7th Ed.):**
-> Bilgin, M. (2025). *Blackbox Simulator* (Version 1.0.0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.17635298
+> Bilgin, M. (2025). *Blackbox Simulator* (Version 1.0.0) [Computer software]. Zenodo. [https://doi.org/10.5281/zenodo.17635298](https://doi.org/10.5281/zenodo.17635298)
 
 **BibTeX:**
 ```bibtex
-@software{gladia_batch_transcriber,
+@software{black-box-simulator,
   author       = {Bilgin, Mustafa},
   title        = {Blackbox Simulator},
   year         = {2025},
